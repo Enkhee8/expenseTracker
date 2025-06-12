@@ -1,5 +1,9 @@
 package org.example;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Scanner;
 
@@ -9,6 +13,7 @@ public class ExpenseTracker {
     ArrayList<Expense> expenses = new ArrayList<>();
 
     public void menu() {
+        loadExpenseFromFile();
         while (true) {
             System.out.println("---Expense Tracker System----");
             System.out.println("1. Add expenses");
@@ -74,6 +79,7 @@ public class ExpenseTracker {
     }
 
     public void exit() {
+        saveToFile();
         System.out.println("Good bye!");
 
     }
@@ -136,5 +142,39 @@ public class ExpenseTracker {
         Expense removed = expenses.remove(number - 1);
         System.out.println("Deleted expense: " + removed);
     }
+
+    //This saves the list to a text file:
+    public void saveToFile() {
+        try {
+            FileWriter writer = new FileWriter("expenses.txt");
+            for (Expense e : expenses) {
+                writer.write(e.toString() + "\n");
+            }
+            writer.close();
+            System.out.println("Expenses saved to file.");
+        } catch (IOException e) {
+            System.out.println("Error saving file: " + e.getMessage());
+        }
+    }
+
+    public void loadExpenseFromFile() {
+        try (Scanner fileScanner = new Scanner(new File("expense.txt"))) {
+            while (fileScanner.hasNextLine()) {
+                String line = fileScanner.nextLine();
+                String[] parts = line.split(",");
+                if (parts.length == 4) {
+                    double amount = Double.parseDouble(parts[0]);
+                    String category = parts[1];
+                    String date = parts[2];
+                    String note  = parts[3];
+                    expenses.add(new Expense(amount, category, date, note));
+                }
+            }
+            System.out.println("Expenses loaded from file");
+        } catch (FileNotFoundException e) {
+            System.out.println("No saved file found. Starting fresh. ");
+        }
+    }
+
 
 }
